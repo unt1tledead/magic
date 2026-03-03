@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NOIR CASINO</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080808;--surface:#111;--surface2:#181818;--border:#222;--gold:#d4a843;--gold2:#f0c060;--text:#e8e0d0;--muted:#666;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;}
+.header{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.logo{font-family:'Playfair Display',serif;font-size:1.3rem;letter-spacing:4px;color:var(--gold);}
+.logo span{color:var(--text);opacity:0.3;}
+.balance-chip{background:var(--surface2);border:1px solid var(--border);padding:6px 14px;text-align:right;}
+.amt{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);}
+.lbl{font-size:0.5rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.nav{display:flex;border-bottom:1px solid var(--border);background:var(--surface);overflow-x:auto;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{flex-shrink:0;padding:11px 10px;font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;cursor:pointer;color:var(--muted);border:none;background:none;font-family:'Montserrat',sans-serif;transition:all 0.2s;border-bottom:2px solid transparent;white-space:nowrap;}
+.nav-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+.screen{display:none;padding:14px;}
+.screen.active{display:block;}
+
+/* ОБЩАЯ ПАНЕЛЬ СТАВОК */
+.bet-panel{background:var(--surface);border:1px solid var(--border);padding:12px;margin-bottom:12px;}
+.bet-input-container{display:flex;gap:8px;margin-bottom:10px;}
+.custom-bet{flex:1;background:#000;border:1px solid var(--border);padding:10px;color:var(--gold);font-family:'Montserrat',sans-serif;font-weight:700;outline:none;}
+.bet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;}
+.bet-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.b-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 0;font-size:0.65rem;font-weight:700;cursor:pointer;}
+.b-btn.gold{color:var(--gold);border-color:var(--gold);}
+.b-btn.red{color:#e74c3c;}
+
+.main-btn{width:100%;background:linear-gradient(180deg,var(--gold2),var(--gold));border:none;padding:14px;font-family:'Playfair Display',serif;font-size:1rem;letter-spacing:3px;color:#000;cursor:pointer;font-weight:900;text-transform:uppercase;}
+.main-btn:disabled{opacity:0.3;}
+.result-msg{text-align:center;font-size:0.85rem;min-height:26px;margin:10px 0;color:var(--muted);}
+.result-msg.win{color:var(--gold);font-weight:700;}
+
+/* ИГРОВЫЕ ЭЛЕМЕНТЫ */
+.panel{background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:12px;}
+.reels{display:flex;gap:6px;margin-bottom:10px;}
+.reel{flex:1;background:#0a0a0a;border:1px solid var(--border);height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem;}
+.miner-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;}
+.mine-cell{aspect-ratio:1;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;}
+.mine-cell.safe{background:rgba(46,204,113,0.1);border-color:#2ecc71;}
+.mine-cell.bomb{background:rgba(231,76,60,0.2);border-color:#e74c3c;}
+.cashout-btn{width:100%;background:#2ecc71;border:none;padding:12px;color:#fff;font-weight:700;margin-bottom:8px;display:none;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Noir<span> · </span>Casino</div>
+  <div class="balance-chip">
+    <div class="lbl">Баланс</div>
+    <div class="amt" id="balDisp">1 000 ₽</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="goTab('lobby',this)">Лобби</button>
+  <button class="nav-btn" onclick="goTab('slots',this)">Слоты</button>
+  <button class="nav-btn" onclick="goTab('miner',this)">Майнер</button>
+</div>
+
+<div id="betUI" style="display:none; padding:14px 14px 0 14px;">
+  <div class="bet-panel">
+    <div class="lbl" style="margin-bottom:5px;">Ставка:</div>
+    <div class="bet-input-container">
+      <input type="number" id="betInput" class="custom-bet" value="10">
+    </div>
+    <div class="bet-grid">
+      <button class="b-btn" onclick="addBet(10)">+10</button>
+      <button class="b-btn" onclick="addBet(25)">+25</button>
+      <button class="b-btn" onclick="addBet(50)">+50</button>
+      <button class="b-btn" onclick="addBet(100)">+100</button>
+    </div>
+    <div class="bet-actions">
+      <button class="b-btn gold" onclick="setAllIn()">ВА-БАНК</button>
+      <button class="b-btn red" onclick="resetBet()">СБРОСИТЬ</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen active" id="tab-lobby">
+  <div style="text-align:center; padding:40px 20px;">
+    <h2 style="font-family:'Playfair Display'; font-size:1.8rem; color:var(--gold);">Noir</h2>
+    <p style="color:var(--muted); font-size:0.7rem; letter-spacing:2px; text-transform:uppercase;">Выберите игру в меню</p>
+  </div>
+</div>
+
+<div class="screen" id="tab-slots">
+  <div class="panel">
+    <div class="reels">
+      <div class="reel" id="s1">7</div>
+      <div class="reel" id="s2">7</div>
+      <div class="reel" id="s3">7</div>
+    </div>
+  </div>
+  <div class="result-msg" id="slotMsg">Удачи!</div>
+  <button class="main-btn" onclick="playSlots()">КРУТИТЬ</button>
+</div>
+
+<div class="screen" id="tab-miner">
+  <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+    <select id="bombs" style="background:#111; color:white; border:1px solid #333; padding:5px;">
+      <option value="3">3 бомбы</option>
+      <option value="5" selected>5 бомб</option>
+      <option value="10">10 бомб</option>
+    </select>
+    <div id="mMult" style="color:var(--gold); font-weight:700;">x1.00</div>
+  </div>
+  <div class="miner-grid" id="mGrid"></div>
+  <div class="result-msg" id="mMsg">Сделайте ставку</div>
+  <button id="mCash" class="cashout-btn" onclick="minerCashout()">ЗАБРАТЬ</button>
+  <button id="mStart" class="main-btn" onclick="startMiner()">ИГРАТЬ</button>
+</div>
+
+<script>
+let bal = 1000;
+let mActive = false, mBombs = [], mOpened = 0, mMult = 1;
+
+function fmt(n) { return n.toLocaleString() + ' ₽'; }
+
+// Вибрация ТОЛЬКО при победе
+function winVibe() {
+    if (navigator.vibrate) navigator.vibrate(15);
+}
+
+function updBal(n) {
+    bal += n;
+    if (n > 0) winVibe(); 
+    if (bal <= 0) bal = 100;
+    document.getElementById('balDisp').textContent = fmt(bal);
+}
+
+// Функции управления ставкой
+function addBet(v) { 
+    let i = document.getElementById('betInput');
+    i.value = parseInt(i.value) + v;
+}
+function resetBet() { document.getElementById('betInput').value = 0; }
+function setAllIn() { document.getElementById('betInput').value = bal; }
+function getBet() { return parseInt(document.getElementById('betInput').value) || 0; }
+
+function goTab(id, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+    document.getElementById('betUI').style.display = (id === 'lobby') ? 'none' : 'block';
+}
+
+// SLOTS
+function playSlots() {
+    let bet = getBet();
+    if (bet > bal || bet <= 0) return;
+    updBal(-bet);
+    
+    const icons = ['🍒','💎','7','⭐','🔔'];
+    let res = [icons[Math.floor(Math.random()*5)], icons[Math.floor(Math.random()*5)], icons[Math.floor(Math.random()*5)]];
+    
+    document.getElementById('s1').textContent = res[0];
+    document.getElementById('s2').textContent = res[1];
+    document.getElementById('s3').textContent = res[2];
+    
+    let msg = document.getElementById('slotMsg');
+    if (res[0] === res[1] && res[1] === res[2]) {
+        let w = bet * 10;
+        msg.textContent = "ВЫИГРЫШ: " + w;
+        msg.className = "result-msg win";
+        updBal(w);
+    } else {
+        msg.textContent = "Попробуйте еще раз";
+        msg.className = "result-msg";
+    }
+}
+
+// MINER
+function buildGrid() {
+    let g = document.getElementById('mGrid');
+    g.innerHTML = '';
+    for(let i=0; i<25; i++) {
+        let c = document.createElement('div');
+        c.className = 'mine-cell';
+        c.onclick = () => openCell(i, c);
+        g.appendChild(c);
+    }
+}
+
+function startMiner() {
+    let bet = getBet();
+    if (bet > bal || bet <= 0) return;
+    updBal(-bet);
+    
+    mActive = true; mOpened = 0; mMult = 1;
+    let bCount = parseInt(document.getElementById('bombs').value);
+    mBombs = [];
+    while(mBombs.length < bCount) {
+        let r = Math.floor(Math.random()*25);
+        if(!mBombs.includes(r)) mBombs.push(r);
+    }
+    
+    buildGrid();
+    document.getElementById('mStart').style.display = 'none';
+    document.getElementById('mCash').style.display = 'block';
+    document.getElementById('mMult').textContent = 'x1.00';
+    document.getElementById('mMsg').textContent = "Ищите алмазы...";
+}
+
+function openCell(i, el) {
+    if (!mActive || el.classList.contains('safe')) return;
+    
+    if (mBombs.includes(i)) {
+        el.textContent = '💣';
+        el.classList.add('bomb');
+        mActive = false;
+        document.getElementById('mMsg').textContent = "БОМБА! Ставка сгорела";
+        setTimeout(resetMinerUI, 2000);
+    } else {
+        el.textContent = '💎';
+        el.classList.add('safe');
+        mOpened++;
+        let bCount = parseInt(document.getElementById('bombs').value);
+        mMult = mMult * ( (25-(mOpened-1)) / (25-(mOpened-1)-bCount) ) * 0.98;
+        document.getElementById('mMult').textContent = 'x' + mMult.toFixed(2);
+    }
+}
+
+function minerCashout() {
+    if (!mActive || mOpened === 0) return;
+    let win = Math.floor(getBet() * mMult);
+    updBal(win);
+    document.getElementById('mMsg').textContent = "ВЫИГРАНО: " + win;
+    resetMinerUI();
+}
+
+function resetMinerUI() {
+    mActive = false;
+    document.getElementById('mStart').style.display = 'block';
+    document.getElementById('mCash').style.display = 'none';
+}
+
+buildGrid();
+</script>
+</body>
+</html>

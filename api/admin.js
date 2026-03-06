@@ -27,7 +27,8 @@ export default async function handler(req, res) {
     let patch = {};
     if (action === 'give')        patch = { bonus_balance: amount };
     if (action === 'clear_bonus') patch = { bonus_balance: 0 };
-    if (action === 'reset')       patch = { balance: 1000, bonus_balance: 0 };
+    if (action === 'reset')       patch = { reset_needed: true, bonus_balance: 0 };
+    if (action === 'clear_reset') patch = { reset_needed: false };
     if (action === 'ban')         patch = { banned: true };
     if (action === 'unban')       patch = { banned: false };
 

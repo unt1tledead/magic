@@ -59,7 +59,9 @@ export default async function handler(req, res) {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     });
     const data = await r.json();
-    return res.status(200).json(data);
+    // Обрезаем баланс до безопасного JS числа чтобы не сломать рендер
+    const safe = data.map(p => ({...p, balance: Math.min(Number(p.balance)||0, 999999999999)}));
+    return res.status(200).json(safe);
   }
 
   res.status(405).json({ error: 'method not allowed' });
